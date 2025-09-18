@@ -24,11 +24,11 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
     _classroomsFuture = _classroomService.getAllClassrooms();
   }
 
-  Future<void> _showAddClassroomDialog() async {
+  Future<void> _showClassroomDialog({Classroom? classroom}) async {
     final _formKey = GlobalKey<FormState>();
-    String name = '';
-    String description = '';
-    int? selectedTeacherId;
+    String name = classroom?.name ?? '';
+    String description = classroom?.description ?? '';
+    int? selectedTeacherId = classroom?.teacherId;
     List<Teacher> teachers = [];
 
     await showDialog(
@@ -54,7 +54,6 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
               );
             }
             final teachers = (snapshot.data ?? []).where((t) => t.id != null).toList();
-            print(teachers.map((t) => t.id).toList());
             final validTeachers = teachers.where((t) => t.id != null).toList();
             if (validTeachers.isEmpty) {
               return AlertDialog(
@@ -91,12 +90,12 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Row(
-                          children: const [
-                            Icon(Icons.meeting_room, color: Color(0xFF1976D2), size: 28),
-                            SizedBox(width: 10),
+                          children: [
+                            const Icon(Icons.meeting_room, color: Color(0xFF1976D2), size: 28),
+                            const SizedBox(width: 10),
                             Text(
-                              'Agregar Salón',
-                              style: TextStyle(
+                              classroom == null ? 'Agregar Salón' : 'Editar Salón',
+                              style: const TextStyle(
                                 color: Color(0xFF1976D2),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 22,
@@ -106,6 +105,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                         ),
                         const SizedBox(height: 18),
                         TextFormField(
+                          initialValue: name,
                           decoration: InputDecoration(
                             labelText: 'Nombre',
                             filled: true,
@@ -124,6 +124,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                         ),
                         const SizedBox(height: 14),
                         TextFormField(
+                          initialValue: description,
                           decoration: InputDecoration(
                             labelText: 'Descripción',
                             filled: true,
@@ -142,6 +143,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                         ),
                         const SizedBox(height: 14),
                         DropdownButtonFormField<int>(
+                          value: selectedTeacherId,
                           decoration: InputDecoration(
                             labelText: 'Profesor',
                             filled: true,
@@ -187,13 +189,25 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                               onPressed: () async {
                                 if (_formKey.currentState!.validate() && selectedTeacherId != null) {
                                   try {
-                                    await ClassroomService.createClassroom(
-                                      Classroom(
-                                        name: name,
-                                        description: description,
-                                        teacherId: selectedTeacherId!,
-                                      ),
-                                    );
+                                    if (classroom == null) {
+                                      await ClassroomService.createClassroom(
+                                        Classroom(
+                                          name: name,
+                                          description: description,
+                                          teacherId: selectedTeacherId!,
+                                        ),
+                                      );
+                                    } else {
+                                      await _classroomService.updateClassroom(
+                                        classroom.id!.toString(),
+                                        Classroom(
+                                          id: classroom.id,
+                                          name: name,
+                                          description: description,
+                                          teacherId: selectedTeacherId!,
+                                        ),
+                                      );
+                                    }
                                     if (mounted) Navigator.of(context).pop();
                                     setState(() {
                                       _classroomsFuture = _classroomService.getAllClassrooms();
@@ -205,7 +219,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                                   }
                                 }
                               },
-                              child: const Text('Agregar', style: TextStyle(color: Colors.white)),
+                              child: Text(classroom == null ? 'Agregar' : 'Guardar', style: const TextStyle(color: Colors.white)),
                             ),
                           ],
                         ),
@@ -264,6 +278,32 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                       elevation: 6,
                       margin: const EdgeInsets.symmetric(vertical: 10),
                       child: ListTile(
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Color(0xFF1976D2)),
+                              onPressed: () {
+                                _showClassroomDialog(classroom: classroom);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                try {
+                                  await _classroomService.deleteClassroom(classroom.id!.toString());
+                                  setState(() {
+                                    _classroomsFuture = _classroomService.getAllClassrooms();
+                                  });
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error al eliminar: $e')),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         title: Text(
                           classroom.name,
@@ -277,14 +317,19 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text(
-                              classroom.description,
-                              style: const TextStyle(fontSize: 16),
-                            ),
+                            Text(classroom.description, style: const TextStyle(fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(
-                              'Profesor ID: ${classroom.teacherId}',
-                              style: const TextStyle(fontSize: 14, color: Colors.grey),
+                            FutureBuilder<String>(
+                              future: _teachersService.getTeacherFullNameById(classroom.teacherId),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const Text('Cargando profesor...', style: TextStyle(fontSize: 14, color: Colors.grey));
+                                }
+                                return Text(
+                                  'Profesor: ${snapshot.data ?? "Desconocido"}',
+                                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -314,7 +359,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
           ],
         ),
         child: FloatingActionButton.extended(
-          onPressed: _showAddClassroomDialog,
+          onPressed: () => _showClassroomDialog(),
           backgroundColor: Colors.transparent,
           elevation: 0,
           label: const Text(
