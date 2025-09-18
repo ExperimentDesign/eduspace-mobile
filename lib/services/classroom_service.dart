@@ -32,4 +32,38 @@ class ClassroomService {
       throw Exception('Error al crear el salón');
     }
   }
+
+  Future<bool> deleteClassroom(String classroomId) async {
+    final url = '${ApiConfig.classrooms}/$classroomId';
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else {
+      throw Exception('Error al eliminar el salón');
+    }
+  }
+
+  Future<bool> updateClassroom(String classroomId, Classroom classroom) async {
+    final url = '${ApiConfig.classrooms}/$classroomId';
+    final jsonBody = json.encode({
+      'id': classroom.id,
+      'name': classroom.name,
+      'description': classroom.description,
+      'teacherId': classroom.teacherId,
+    });
+    print('Recibiendo: $jsonBody a $url');
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonBody,
+    );
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else {
+      throw Exception('Error al actualizar el salón');
+    }
+  }
 }
