@@ -34,4 +34,15 @@ class TeachersService {
       throw Exception('Error al crear el profesor');
     }
   }
+
+  Future<String> getTeacherFullNameById(int id) async {
+    try {
+      final teacher = await getTeacherById(id);
+      return '${teacher.firstName} ${teacher.lastName}';
+    } catch (e) {
+      return 'Desconocido';
+    }
+  }
+
+
 }
