@@ -181,6 +181,171 @@ class _SharedSpacesPageState extends State<SharedSpacesPage> {
     );
   }
 
+
+  Future<void> _showEditSharedSpaceDialog(SharedSpace space) async {
+    final _formKey = GlobalKey<FormState>();
+    String name = space.name;
+    String description = space.description;
+    int? capacity = space.capacity;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          elevation: 16,
+          backgroundColor: Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: const [
+                        Icon(Icons.edit, color: Color(0xFF1976D2), size: 28),
+                        SizedBox(width: 10),
+                        Text(
+                          'Editar Espacio',
+                          style: TextStyle(
+                            color: Color(0xFF1976D2),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 22,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    TextFormField(
+                      initialValue: name,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => name = v,
+                      validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                    ),
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      initialValue: capacity.toString(),
+                      decoration: InputDecoration(
+                        labelText: 'Capacidad',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                      onChanged: (v) => capacity = int.tryParse(v),
+                      validator: (v) {
+                        if (v == null || v.isEmpty) return 'Requerido';
+                        final n = int.tryParse(v);
+                        if (n == null || n <= 0) return 'Ingrese un número válido';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    TextFormField(
+                      initialValue: description,
+                      decoration: InputDecoration(
+                        labelText: 'Descripción',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => description = v,
+                      validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xFF1976D2),
+                            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancelar'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF1976D2),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            elevation: 2,
+                          ),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              try {
+                                await _sharedSpacesService.updateSharedSpace(
+                                  SharedSpace(
+                                    id: space.id,
+                                    name: name,
+                                    capacity: capacity!,
+                                    description: description,
+                                  ),
+                                );
+                                if (mounted) Navigator.of(context).pop();
+                                setState(() {
+                                  _sharedSpacesFuture = _sharedSpacesService.getAllSharedSpaces();
+                                });
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e')),
+                                );
+                              }
+                            }
+                          },
+                          child: const Text('Guardar', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,7 +360,7 @@ class _SharedSpacesPageState extends State<SharedSpacesPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -224,6 +389,32 @@ class _SharedSpacesPageState extends State<SharedSpacesPage> {
                       elevation: 6,
                       margin: const EdgeInsets.symmetric(vertical: 10),
                       child: ListTile(
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.orange),
+                              onPressed: ()  {
+                                _showEditSharedSpaceDialog(space);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                try {
+                                  await _sharedSpacesService.deleteSharedSpace(space.id);
+                                  setState(() {
+                                    _sharedSpacesFuture = _sharedSpacesService.getAllSharedSpaces();
+                                  });
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Error: $e')),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         title: Text(
                           space.name,
@@ -237,15 +428,9 @@ class _SharedSpacesPageState extends State<SharedSpacesPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
-                            Text(
-                              'Capacidad: ${space.capacity}',
-                              style: const TextStyle(fontSize: 16),
-                            ),
+                            Text('Capacidad: ${space.capacity}', style: const TextStyle(fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(
-                              space.description,
-                              style: const TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
+                            Text(space.description, style: const TextStyle(fontSize: 14, color: Colors.grey)),
                           ],
                         ),
                       ),

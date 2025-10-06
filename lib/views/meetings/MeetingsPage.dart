@@ -248,7 +248,7 @@ class _MeetingsPageState extends State<MeetingsPage> {
               child: const Text('Guardar', style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  final adminId = await getAdministratorIdFromToken();
+                  final adminId = await getUserIdFromToken();
                   if (adminId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('No se pudo obtener el ID del administrador')),
@@ -287,6 +287,284 @@ class _MeetingsPageState extends State<MeetingsPage> {
     );
   }
 
+  Future<void> _showEditMeetingDialog(Meeting meeting) async {
+    final _formKey = GlobalKey<FormState>();
+    String title = meeting.title;
+    String description = meeting.description;
+    DateTime? selectedDate = DateTime.tryParse(meeting.date);
+    TimeOfDay? startTime = TimeOfDay(
+      hour: int.parse(meeting.start.split(':')[0]),
+      minute: int.parse(meeting.start.split(':')[1]),
+    );
+    TimeOfDay? endTime = TimeOfDay(
+      hour: int.parse(meeting.end.split(':')[0]),
+      minute: int.parse(meeting.end.split(':')[1]),
+    );
+    List<Classroom> classrooms = await ClassroomService().getAllClassrooms();
+    Classroom? selectedClassroom = classrooms.isNotEmpty
+        ? classrooms.firstWhere((c) => c.id == meeting.classroomId, orElse: () => classrooms[0])
+        : null
+    ;
+    final dateController = TextEditingController(
+      text: selectedDate != null
+          ? '${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}'
+          : '',
+    );
+    final startTimeController = TextEditingController(
+      text: startTime != null ? startTime.format(context) : '',
+    );
+    final endTimeController = TextEditingController(
+      text: endTime != null ? endTime.format(context) : '',
+    );
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          title: Row(
+            children: const [
+              Icon(Icons.edit, color: Color(0xFF1976D2), size: 28),
+              SizedBox(width: 10),
+              Text(
+                'Editar reunión',
+                style: TextStyle(
+                  color: Color(0xFF1976D2),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: title,
+                    decoration: InputDecoration(
+                      labelText: 'Título',
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                      ),
+                    ),
+                    onChanged: (v) => title = v,
+                    validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                  ),
+                  const SizedBox(height: 14),
+                  TextFormField(
+                    initialValue: description,
+                    decoration: InputDecoration(
+                      labelText: 'Descripción',
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                      ),
+                    ),
+                    onChanged: (v) => description = v,
+                  ),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: selectedDate ?? DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          selectedDate = picked;
+                          dateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: dateController,
+                        decoration: InputDecoration(
+                          labelText: 'Fecha',
+                          filled: true,
+                          fillColor: const Color(0xFFF5F7FA),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                          ),
+                          suffixIcon: const Icon(Icons.calendar_today),
+                        ),
+                        validator: (v) => selectedDate == null ? 'Seleccione una fecha' : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: startTime ?? TimeOfDay.now(),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          startTime = picked;
+                          startTimeController.text = picked.format(context);
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: startTimeController,
+                        decoration: InputDecoration(
+                          labelText: 'Inicio',
+                          filled: true,
+                          fillColor: const Color(0xFFF5F7FA),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                          ),
+                          suffixIcon: const Icon(Icons.access_time),
+                        ),
+                        validator: (v) => startTime == null ? 'Seleccione hora de inicio' : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: endTime ?? TimeOfDay.now(),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          endTime = picked;
+                          endTimeController.text = picked.format(context);
+                        });
+                      }
+                    },
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: endTimeController,
+                        decoration: InputDecoration(
+                          labelText: 'Fin',
+                          filled: true,
+                          fillColor: const Color(0xFFF5F7FA),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                          ),
+                          suffixIcon: const Icon(Icons.access_time),
+                        ),
+                        validator: (v) => endTime == null ? 'Seleccione hora de fin' : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  DropdownButtonFormField<Classroom>(
+                    value: selectedClassroom,
+                    decoration: InputDecoration(
+                      labelText: 'Salón',
+                      filled: true,
+                      fillColor: const Color(0xFFF5F7FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                      ),
+                    ),
+                    items: classrooms
+                        .map((c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(c.name),
+                    ))
+                        .toList(),
+                    onChanged: (c) => selectedClassroom = c,
+                    validator: (v) => v == null ? 'Seleccione un salón' : null,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF1976D2),
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1976D2),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                elevation: 2,
+              ),
+              child: const Text('Guardar', style: TextStyle(color: Colors.white)),
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  if (selectedClassroom == null || selectedDate == null || startTime == null || endTime == null) return;
+                  final updatedMeeting = Meeting(
+                    meetingId: meeting.meetingId,
+                    title: title,
+                    description: description,
+                    date: '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}',
+                    start: '${startTime!.hour.toString().padLeft(2, '0')}:${startTime!.minute.toString().padLeft(2, '0')}:00',
+                    end: '${endTime!.hour.toString().padLeft(2, '0')}:${endTime!.minute.toString().padLeft(2, '0')}:00',
+                    administratorId: meeting.administratorId,
+                    classroomId: selectedClassroom!.id!,
+                  );
+                  try {
+                    await MeetingsService().updateMeeting(updatedMeeting);
+                    if (mounted) Navigator.pop(context);
+                    setState(() {
+                      _meetingsFuture = MeetingsService().getAllMeetings();
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error al actualizar la reunión: $e')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -301,7 +579,7 @@ class _MeetingsPageState extends State<MeetingsPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -330,6 +608,32 @@ class _MeetingsPageState extends State<MeetingsPage> {
                     elevation: 6,
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     child: ListTile(
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.orange),
+                            onPressed: () {
+                              _showEditMeetingDialog(meeting);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              try {
+                                await MeetingsService().deleteMeeting(meeting.meetingId!);
+                                setState(() {
+                                  _meetingsFuture = MeetingsService().getAllMeetings();
+                                });
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Error: $e')),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       title: Text(
                         meeting.title,
