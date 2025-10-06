@@ -21,7 +21,7 @@ class Meeting {
 
   factory Meeting.fromJson(Map<String, dynamic> json) {
     return Meeting(
-      meetingId: json['meetingId'] as int,
+      meetingId: json['meetingId'] as int?,
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       date: json['date'] as String? ?? '',
@@ -33,14 +33,19 @@ class Meeting {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final data = {
       'title': title,
       'description': description,
       'date': date,
       'start': start,
       'end': end,
-      'administratorId': {'administratorIdentifier': administratorId},
-      'classroomId': {'classroomIdentifier': classroomId},
+      'administratorId': administratorId,
+      'classroomId': classroomId,
     };
+    if (meetingId != null) {
+      data['meetingId'] = meetingId as Object;
+    }
+    return data;
   }
+
 }
