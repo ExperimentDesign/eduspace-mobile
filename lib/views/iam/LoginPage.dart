@@ -1,7 +1,9 @@
 import 'package:eduspace_mobile/views/home/HomePage.dart';
+import 'package:eduspace_mobile/views/summary/SummaryPage.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/auth_service.dart';
+import 'package:eduspace_mobile/utils/token_utils.dart';
 import 'RegisterPage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -32,10 +34,23 @@ class _LoginPageState extends State<LoginPage> {
     if (result != null && result['token'] != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', result['token']);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+
+      final role = await getUserRoleFromToken();
+      if (role == 'RoleAdmin') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else if (role == 'RoleTeacher') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SummaryPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Rol no reconocido')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Credenciales incorrectas')),
@@ -49,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)], // azul a verde
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)], // azul a verde
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -67,10 +82,18 @@ class _LoginPageState extends State<LoginPage> {
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(height: 20),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(32), // Adjust the value as needed
+                        child: Image.asset(
+                          'lib/assets/eduspace-logo.png',
+                          width: 240,
+                          height: 240,
+                        ),
+                      ),
                       const Text(
-                        'Bienvenido a EduSpace',
+                        'Bienvenido',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -81,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'Email o Username',
                           prefixIcon: const Icon(Icons.email, color: Color(0xFF1976D2)),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
@@ -91,9 +114,6 @@ class _LoginPageState extends State<LoginPage> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Por favor ingresa tu email';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Ingresa un email válido';
                           }
                           return null;
                         },
