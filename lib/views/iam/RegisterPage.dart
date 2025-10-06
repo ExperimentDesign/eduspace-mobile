@@ -161,7 +161,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         keyboardType: TextInputType.phone,
-                        validator: (value) => value!.isEmpty ? 'Ingrese su celular' : null,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Ingrese su celular';
+                          final phoneRegex = RegExp(r'^\d{9}$');
+                          if (!phoneRegex.hasMatch(value)) return 'El celular debe tener 9 dígitos numéricos';
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -174,7 +179,13 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) => value!.isEmpty ? 'Ingrese su email' : null,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Ingrese su email';
+                          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                          if (!emailRegex.hasMatch(value)) return 'Ingrese un email válido';
+                          if ('@'.allMatches(value).length != 1) return 'El email debe contener solo un @';
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -186,7 +197,12 @@ class _RegisterPageState extends State<RegisterPage> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        validator: (value) => value!.isEmpty ? 'Ingrese un usuario' : null,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Ingrese un usuario';
+                          final onlySpecialChars = RegExp(r'^[^a-zA-Z0-9]+$');
+                          if (onlySpecialChars.hasMatch(value)) return 'El usuario no puede ser solo caracteres especiales';
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -212,7 +228,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           ),
                         ),
                         keyboardType: TextInputType.number,
-                        validator: (value) => value!.isEmpty ? 'Ingrese su DNI' : null,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) return 'Ingrese su DNI';
+                          final dniRegex = RegExp(r'^\d{8}$');
+                          if (!dniRegex.hasMatch(value)) return 'El DNI debe tener 8 dígitos numéricos';
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
