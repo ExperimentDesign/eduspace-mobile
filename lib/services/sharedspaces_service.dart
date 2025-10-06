@@ -24,4 +24,22 @@ class SharedSpacesService {
       throw Exception('Error al crear el espacio compartido');
     }
   }
+
+  Future<void> deleteSharedSpace(int id) async {
+    final response = await http.delete(Uri.parse('${ApiConfig.sharedSpaces}/$id'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error al eliminar el espacio compartido');
+    }
+  }
+
+  Future<void> updateSharedSpace(SharedSpace sharedSpace) async {
+    final response = await http.put(
+      Uri.parse('${ApiConfig.sharedSpaces}/${sharedSpace.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(sharedSpace.toJson()),
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error al actualizar el espacio compartido');
+    }
+  }
 }

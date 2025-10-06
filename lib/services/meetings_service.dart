@@ -37,4 +37,26 @@ class MeetingsService {
       throw Exception('Error al crear la reunión');
     }
   }
+
+  Future<void> deleteMeeting(int meetingId) async {
+    final url = '${ApiConfig.meetings}/$meetingId';
+    final response = await http.delete(Uri.parse(url));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error deleting meeting');
+    }
+  }
+
+  Future<void> updateMeeting(Meeting meeting) async {
+    final url = '${ApiConfig.meetings}/${meeting.meetingId}';
+    final body = json.encode(meeting.toJson());
+    print('PUT $url body: $body'); // Visualize the data sent
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error updating meeting');
+    }
+  }
 }
