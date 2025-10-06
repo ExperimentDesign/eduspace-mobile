@@ -26,4 +26,13 @@ class ApiConfig {
 
   // Meetings endpoints
   static const String meetings = '$baseUrl/meetings';
+
+  // Resources endpoints
+  static const String resources = '$classrooms/resources';
+
+  // Reports endpoints
+  static const String reports = '$baseUrl/reports';
+
+  // Reservations endpoints
+  static const String reservations = '$baseUrl/reservations';
 }
