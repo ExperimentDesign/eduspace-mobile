@@ -249,7 +249,7 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

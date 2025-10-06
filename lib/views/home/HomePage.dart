@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<AdministratorProfile?> _loadAdminProfile() async {
-    final adminId = await getAdministratorIdFromToken();
+    final adminId = await getUserIdFromToken();
     if (adminId == null) return null;
     return await AdminService().getAdminById(adminId);
   }
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),

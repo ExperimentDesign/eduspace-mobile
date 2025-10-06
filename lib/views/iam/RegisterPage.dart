@@ -84,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)], // azul a verde
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)], // azul a verde
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
