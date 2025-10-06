@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/teachers_service.dart';
 import '../../models/teacher.dart';
+import '../../utils/token_utils.dart';
 import '../../widgets/app_drawer.dart';
 
 class TeachersManagementPage extends StatefulWidget {
@@ -107,8 +108,30 @@ class _TeachersManagementPageState extends State<TeachersManagementPage> {
                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           elevation: 2,
                         ),
-                        onPressed: () {
-
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            final administratorId = await getUserIdFromToken();
+                            if (administratorId == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('No se pudo obtener el ID del administrador')),
+                              );
+                              return;
+                            }
+                            final newTeacher = Teacher(
+                              firstName: firstName,
+                              lastName: lastName,
+                              email: email,
+                              dni: dni,
+                              address: address,
+                              phone: phone,
+                              administratorId: administratorId,
+                              username: username,
+                              password: password,
+                            );
+                            await _teachersService.createTeacher(newTeacher);
+                            Navigator.of(context).pop();
+                            setState(() {}); // Refresh the list
+                          }
                         },
                         child: const Text('Agregar', style: TextStyle(color: Colors.white)),
                       ),
@@ -138,7 +161,7 @@ class _TeachersManagementPageState extends State<TeachersManagementPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+            colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
