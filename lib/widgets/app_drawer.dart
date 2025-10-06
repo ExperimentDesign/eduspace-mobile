@@ -50,7 +50,7 @@ class AppDrawer extends StatelessWidget {
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1976D2), Color(0xFF43E97B)],
+                colors: [Color(0xFF1976D2), Color(0xFFFCDE5B)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -73,6 +73,7 @@ class AppDrawer extends StatelessWidget {
           buildTile(icon: Icons.meeting_room, title: 'Classrooms', route: '/classrooms'),
           buildTile(icon: Icons.group_work, title: 'Shared Spaces', route: '/shared-spaces'),
           buildTile(icon: Icons.event, title: 'Meetings', route: '/meetings'),
+          buildTile(icon: Icons.inventory, title: 'Resources', route: '/resources'),
           buildTile(icon: Icons.person, title: 'Teachers', route: '/teachers'),
           const Spacer(),
           const Divider(thickness: 1, indent: 16, endIndent: 16),
