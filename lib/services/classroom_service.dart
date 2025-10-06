@@ -14,6 +14,18 @@ class ClassroomService {
     }
   }
 
+  Future<List<Classroom>> getClassroomsByTeacherId(int teacherId) async {
+    final url = '${ApiConfig.classrooms}/teachers/$teacherId';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Classroom.fromJson(json)).toList();
+    } else {
+      throw Exception('Error fetching classrooms for teacher $teacherId');
+    }
+  }
+
+
   static Future<bool> createClassroom(Classroom classroom) async {
     final jsonBody = json.encode({
       'name': classroom.name,
