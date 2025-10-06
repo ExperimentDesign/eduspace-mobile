@@ -25,10 +25,12 @@ class TeachersService {
   }
 
   Future<void> createTeacher(Teacher teacher) async {
+    final jsonBody = json.encode(teacher.toJson());
+    print('Sending teacher data: $jsonBody');
     final response = await http.post(
       Uri.parse(ApiConfig.teachersProfiles),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode(teacher.toJson()),
+      body: jsonBody,
     );
     if (response.statusCode != 201 && response.statusCode != 200) {
       throw Exception('Error al crear el profesor');
