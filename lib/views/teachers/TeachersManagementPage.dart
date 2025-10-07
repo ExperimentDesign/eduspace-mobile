@@ -14,6 +14,26 @@ class TeachersManagementPage extends StatefulWidget {
 class _TeachersManagementPageState extends State<TeachersManagementPage> {
   final TeachersService _teachersService = TeachersService();
 
+  String? emailValidator(String? value) {
+    if (value == null || value.isEmpty) return 'Completar campo';
+    if ('@'.allMatches(value).length != 1) return 'El email debe contener un solo @';
+    final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
+    if (!emailRegex.hasMatch(value)) return 'Formato de email inválido';
+    return null;
+  }
+
+  String? dniValidator(String? value) {
+    if (value == null || value.isEmpty) return 'Completar campo';
+    if (!RegExp(r'^\d{8}$').hasMatch(value)) return 'El DNI debe tener 8 dígitos';
+    return null;
+  }
+
+  String? phoneValidator(String? value) {
+    if (value == null || value.isEmpty) return 'Completar campo';
+    if (!RegExp(r'^\d{9}$').hasMatch(value)) return 'El teléfono debe tener 9 dígitos';
+    return null;
+  }
+
   Future<void> _showAddTeacherDialog() async {
     final _formKey = GlobalKey<FormState>();
     String firstName = '', lastName = '', email = '', dni = '', address = '', phone = '', username = '', password = '';
@@ -57,37 +77,162 @@ class _TeachersManagementPageState extends State<TeachersManagementPage> {
                     ],
                   ),
                   const SizedBox(height: 18),
-                  ...[
-                    {'label': 'Nombre', 'onChanged': (v) => firstName = v},
-                    {'label': 'Apellido', 'onChanged': (v) => lastName = v},
-                    {'label': 'Email', 'onChanged': (v) => email = v},
-                    {'label': 'DNI', 'onChanged': (v) => dni = v},
-                    {'label': 'Dirección', 'onChanged': (v) => address = v},
-                    {'label': 'Teléfono', 'onChanged': (v) => phone = v},
-                    {'label': 'Usuario', 'onChanged': (v) => username = v},
-                    {'label': 'Contraseña', 'onChanged': (v) => password = v, 'obscure': true},
-                  ].map((field) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 14),
-                      child: TextFormField(
-                        decoration: InputDecoration(
-                          labelText: field['label'] as String,
-                          filled: true,
-                          fillColor: const Color(0xFFF5F7FA),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
-                          ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Nombre',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
                         ),
-                        obscureText: field['obscure'] == true,
-                        onChanged: field['onChanged'] as void Function(String),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
                       ),
-                    );
-                  }).toList(),
+                      onChanged: (v) => firstName = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Apellido',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => lastName = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => email = v,
+                      validator: emailValidator,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'DNI',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => dni = v,
+                      validator: dniValidator,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Dirección',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => address = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Teléfono',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => phone = v,
+                      validator: phoneValidator,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Usuario',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      onChanged: (v) => username = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        labelText: 'Contraseña',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+                        ),
+                      ),
+                      obscureText: true,
+                      onChanged: (v) => password = v,
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
