@@ -11,6 +11,11 @@ Future<int?> getUserIdFromToken() async {
   return int.tryParse(sid.toString());
 }
 
+Future<int?> getProfileIdFromPrefs() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('profileId');
+}
+
 Future<String?> getUserNameFromToken() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('auth_token');
