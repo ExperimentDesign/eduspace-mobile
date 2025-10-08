@@ -14,6 +14,17 @@ class ResourcesService {
     }
   }
 
+  Future<List<Resource>> getResourcesByClassroomId(int classroomId) async {
+    final url = '${ApiConfig.classrooms}/$classroomId/resources';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Resource.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load resources for classroom $classroomId');
+    }
+  }
+
   Future<Resource> createResource(int classroomId, Resource resource) async {
     final url = '${ApiConfig.classrooms}/$classroomId/resources';
     final response = await http.post(
