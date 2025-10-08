@@ -4,6 +4,7 @@ import '../../services/teachers_service.dart';
 import '../../models/classroom.dart';
 import '../../models/teacher.dart';
 import '../../widgets/app_drawer.dart';
+import 'ClassroomDetails.dart';
 
 class ClassroomsPage extends StatefulWidget {
   const ClassroomsPage({super.key});
@@ -278,6 +279,14 @@ class _ClassroomsPageState extends State<ClassroomsPage> {
                       elevation: 6,
                       margin: const EdgeInsets.symmetric(vertical: 10),
                       child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ClassroomDetails(classroom: classroom),
+                            ),
+                          );
+                        },
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
