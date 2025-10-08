@@ -10,6 +10,7 @@ class ApiConfig {
   // Authentication endpoints (IAM)
   static const String signUp = '$baseUrl/authentication/sign-up';
   static const String signIn = '$baseUrl/authentication/sign-in';
+  static const String verifyCode = '$baseUrl/authentication/verify-code';
 
 
   // Administrator profile endpoints
