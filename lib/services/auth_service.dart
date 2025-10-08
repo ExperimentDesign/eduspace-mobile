@@ -28,6 +28,23 @@ class AuthService {
     }
   }
 
+  Future<Map<String, dynamic>?> verifyCode(String username, String code) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.verifyCode),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'username': username, 'code': code}),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error en verifyCode: $e');
+      return null;
+    }
+  }
+
   static Future<AdministratorProfile> createAdminProfile(AdministratorProfile admin) async {
     final url = Uri.parse(ApiConfig.adminProfiles);
     final body = jsonEncode(admin.toJson());
