@@ -14,6 +14,18 @@ class MeetingsService {
     }
   }
 
+  Future<List<Meeting>> getAllMeetingsByTeacherId(int teacherId) async {
+    final url = '${ApiConfig.baseUrl}/teachers/$teacherId/meetings';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Meeting.fromJson(json)).toList();
+    } else {
+      throw Exception('Error fetching meetings for teacher $teacherId');
+    }
+  }
+
+
   Future<void> createMeeting(Meeting meeting) async {
     // Construir la URL con los IDs
     final url = '${ApiConfig.baseUrl}/administrators/${meeting.administratorId}/classrooms/${meeting.classroomId}/meetings';
