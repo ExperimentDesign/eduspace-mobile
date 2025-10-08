@@ -73,7 +73,7 @@ class AppDrawer extends StatelessWidget {
           buildTile(icon: Icons.meeting_room, title: 'Classrooms', route: '/classrooms'),
           buildTile(icon: Icons.group_work, title: 'Shared Spaces', route: '/shared-spaces'),
           buildTile(icon: Icons.event, title: 'Meetings', route: '/meetings'),
-          buildTile(icon: Icons.inventory, title: 'Resources', route: '/resources'),
+          // buildTile(icon: Icons.inventory, title: 'Resources', route: '/resources'),
           buildTile(icon: Icons.person, title: 'Teachers', route: '/teachers'),
           const Spacer(),
           const Divider(thickness: 1, indent: 16, endIndent: 16),
