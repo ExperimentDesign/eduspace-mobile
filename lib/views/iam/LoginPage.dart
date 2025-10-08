@@ -19,6 +19,71 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _loading = false;
 
+  Future<void> _showVerificationDialog(String message, String username) async {
+    final _codeController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Verificación'),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(message),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _codeController,
+                decoration: const InputDecoration(
+                  labelText: 'Código de verificación',
+                ),
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                validator: (value) {
+                  if (value == null || value.length != 6) {
+                    return 'El código debe tener 6 dígitos';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                final result = await AuthService().verifyCode(username, _codeController.text.trim());
+                if (result != null && result['token'] != null && result['profileId'] != null) {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('auth_token', result['token']);
+                  await prefs.setInt('profileId', int.parse(result['profileId'].toString()));
+                  Navigator.of(context).pop();
+                  final role = await getUserRoleFromToken();
+                  if (role == 'RoleAdmin') {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomePage()));
+                  } else if (role == 'RoleTeacher') {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const SummaryPage()));
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Código incorrecto')),
+                  );
+                }
+              }
+            },
+            child: const Text('Verificar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
@@ -31,26 +96,9 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _loading = false);
 
-    if (result != null && result['token'] != null) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', result['token']);
-
-      final role = await getUserRoleFromToken();
-      if (role == 'RoleAdmin') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      } else if (role == 'RoleTeacher') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const SummaryPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Rol no reconocido')),
-        );
-      }
+    if (result != null && result['message'] != null) {
+      // Show verification dialog
+      await _showVerificationDialog(result['message'], _emailController.text.trim());
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Credenciales incorrectas')),
