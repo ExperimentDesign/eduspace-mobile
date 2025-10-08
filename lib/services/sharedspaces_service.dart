@@ -14,6 +14,16 @@ class SharedSpacesService {
     }
   }
 
+  Future<SharedSpace> getSharedSpaceById(int id) async {
+    final response = await http.get(Uri.parse('${ApiConfig.sharedSpaces}/$id'));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return SharedSpace.fromJson(data);
+    } else {
+      throw Exception('Error al obtener el espacio compartido');
+    }
+  }
+
   Future<void> createSharedSpace(SharedSpace sharedSpace) async {
     final response = await http.post(
       Uri.parse(ApiConfig.sharedSpaces),
