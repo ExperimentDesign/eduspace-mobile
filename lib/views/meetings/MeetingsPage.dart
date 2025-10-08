@@ -248,7 +248,7 @@ class _MeetingsPageState extends State<MeetingsPage> {
               child: const Text('Guardar', style: TextStyle(color: Colors.white)),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  final adminId = await getUserIdFromToken();
+                  final adminId = await getProfileIdFromPrefs();
                   if (adminId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('No se pudo obtener el ID del administrador')),
