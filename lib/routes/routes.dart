@@ -1,6 +1,7 @@
 import 'package:eduspace_mobile/views/classrooms/ClassroomsPage.dart';
 import 'package:eduspace_mobile/views/iam/LoginPage.dart';
 import 'package:eduspace_mobile/views/iam/RegisterPage.dart';
+import 'package:eduspace_mobile/views/reservations/ReservationsPage.dart';
 import 'package:eduspace_mobile/views/resources/ResourcesPage.dart';
 import 'package:eduspace_mobile/views/sharedspaces/SharedSpacesPage.dart';
 import 'package:eduspace_mobile/views/summary/SummaryPage.dart';
@@ -20,4 +21,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/teachers': (context) => TeachersManagementPage(),
   '/resources': (context) => ResourcesPage(),
   '/summary': (context) => SummaryPage(),
+  '/reservations': (context) => ReservationsPage(),
 };
