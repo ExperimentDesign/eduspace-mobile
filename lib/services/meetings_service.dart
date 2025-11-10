@@ -14,6 +14,20 @@ class MeetingsService {
     }
   }
 
+  Future<Meeting> getMeetingById(int meetingId) async {
+    final url = '${ApiConfig.meetings}/$meetingId';
+    print('GET $url');
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return Meeting.fromJson(data);
+    } else if (response.statusCode == 404) {
+      throw Exception('Meeting not found: $meetingId');
+    } else {
+      throw Exception('Error fetching meeting $meetingId: ${response.statusCode}');
+    }
+  }
+
   Future<List<Meeting>> getAllMeetingsByTeacherId(int teacherId) async {
     final url = '${ApiConfig.baseUrl}/teachers/$teacherId/meetings';
     final response = await http.get(Uri.parse(url));
@@ -61,7 +75,7 @@ class MeetingsService {
   Future<void> updateMeeting(Meeting meeting) async {
     final url = '${ApiConfig.meetings}/${meeting.meetingId}';
     final body = json.encode(meeting.toJson());
-    print('PUT $url body: $body'); // Visualize the data sent
+    print('PUT $url body: $body');
     final response = await http.put(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -71,4 +85,27 @@ class MeetingsService {
       throw Exception('Error updating meeting');
     }
   }
+
+  Future<void> addTeacherToMeeting(int meetingId, int teacherId) async {
+    final url = '${ApiConfig.meetings}/$meetingId/teachers/$teacherId';
+    print('POST $url');
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: null,
+    );
+    if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+      throw Exception('Error adding teacher $teacherId to meeting $meetingId: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<void> deleteTeacherFromMeeting(int meetingId, int teacherId) async {
+    final url = '${ApiConfig.meetings}/$meetingId/teachers/$teacherId';
+    print('DELETE $url');
+    final response = await http.delete(Uri.parse(url));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error removing teacher $teacherId from meeting $meetingId: ${response.statusCode} ${response.body}');
+    }
+  }
+
 }
