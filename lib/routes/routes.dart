@@ -9,7 +9,6 @@ import 'package:eduspace_mobile/views/teachers/TeachersManagementPage.dart';
 import 'package:flutter/material.dart';
 
 import '../views/home/HomePage.dart';
-import '../views/meetings/MeetingsPage.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/': (context) => HomePage(),
@@ -17,7 +16,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/register': (context) => RegisterPage(),
   '/classrooms': (context) => ClassroomsPage(),
   '/shared-spaces': (context) => SharedSpacesPage(),
-  '/meetings': (context) => MeetingsPage(),
   '/teachers': (context) => TeachersManagementPage(),
   '/resources': (context) => ResourcesPage(),
   '/summary': (context) => SummaryPage(),
