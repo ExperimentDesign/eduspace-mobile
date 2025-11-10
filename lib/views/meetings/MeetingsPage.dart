@@ -5,6 +5,7 @@ import '../../models/meeting.dart';
 import '../../models/classroom.dart';
 import '../../utils/token_utils.dart';
 import '../../widgets/app_drawer.dart';
+import 'MeetingsDetails.dart';
 
 class MeetingsPage extends StatefulWidget {
   const MeetingsPage({super.key});
@@ -608,6 +609,12 @@ class _MeetingsPageState extends State<MeetingsPage> {
                     elevation: 6,
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     child: ListTile(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MeetingsDetails(meeting: meeting)),
+                        );
+                      },
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
