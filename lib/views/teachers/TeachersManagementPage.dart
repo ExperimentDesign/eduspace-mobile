@@ -291,6 +291,242 @@ class _TeachersManagementPageState extends State<TeachersManagementPage> {
     );
   }
 
+  Future<void> _showEditTeacherDialog(Teacher teacher) async {
+    final _formKey = GlobalKey<FormState>();
+    String firstName = teacher.firstName;
+    String lastName = teacher.lastName;
+    String email = teacher.email;
+    String dni = teacher.dni;
+    String address = teacher.address;
+    String phone = teacher.phone;
+    String username = teacher.username;
+    String password = teacher.password;
+
+    await showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 16,
+        backgroundColor: Colors.white,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: const [
+                      Icon(Icons.edit, color: Color(0xFF1976D2), size: 28),
+                      SizedBox(width: 10),
+                      Text(
+                        'Editar Profesor',
+                        style: TextStyle(
+                          color: Color(0xFF1976D2),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: firstName,
+                      decoration: InputDecoration(
+                        labelText: 'Nombre',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => firstName = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: lastName,
+                      decoration: InputDecoration(
+                        labelText: 'Apellido',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => lastName = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: email,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => email = v,
+                      validator: emailValidator,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: dni,
+                      decoration: InputDecoration(
+                        labelText: 'DNI',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => dni = v,
+                      validator: dniValidator,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: address,
+                      decoration: InputDecoration(
+                        labelText: 'Dirección',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => address = v,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: TextFormField(
+                      initialValue: phone,
+                      decoration: InputDecoration(
+                        labelText: 'Teléfono',
+                        filled: true,
+                        fillColor: const Color(0xFFF5F7FA),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: const BorderSide(color: Color(0xFF1976D2), width: 1),
+                        ),
+                      ),
+                      onChanged: (v) => phone = v,
+                      validator: phoneValidator,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF1976D2),
+                          textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text('Cancelar'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1976D2),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          elevation: 2,
+                        ),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              if (teacher.id == null) {
+                                throw Exception('Teacher id is null');
+                              }
+
+                              final updatedData = {
+                                'firstName': firstName,
+                                'lastName': lastName,
+                                'email': email,
+                                'dni': dni,
+                                'address': address,
+                                'phone': phone,
+                              };
+
+                              await _teachersService.updateTeacher(teacher.id!, updatedData);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Profesor actualizado')),
+                              );
+                              setState(() {});
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Error al actualizar: $e')),
+                              );
+                            }
+                          }
+                        },
+                        child: const Text('Guardar', style: TextStyle(color: Colors.white)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(Teacher teacher) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text('¿Desea eliminar a ${teacher.firstName} ${teacher.lastName}?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
+          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        if (teacher.id == null) throw Exception('Teacher id is null');
+        await _teachersService.deleteTeacher(teacher.id!);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profesor eliminado')));
+        setState(() {});
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -368,6 +604,21 @@ class _TeachersManagementPageState extends State<TeachersManagementPage> {
                           ],
                         ),
                         isThreeLine: true,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Color(0xFF1976D2)),
+                              onPressed: teacher.id != null ? () => _showEditTeacherDialog(teacher) : null,
+                              tooltip: 'Editar',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: teacher.id != null ? () => _confirmDelete(teacher) : null,
+                              tooltip: 'Eliminar',
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
