@@ -42,9 +42,31 @@ class TeachersService {
       final teacher = await getTeacherById(id);
       return '${teacher.firstName} ${teacher.lastName}';
     } catch (e) {
-      return 'Desconocido';
+      return 'Sin asignar';
     }
   }
 
+  Future<void> deleteTeacher(int id) async {
+    final response = await http.delete(Uri.parse('${ApiConfig.teachersProfiles}/$id'));
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Error al eliminar el profesor');
+    }
+  }
+
+  Future<void> updateTeacher(int id, Map<String, dynamic> updatedFields) async {
+    final jsonBody = json.encode(updatedFields);
+    print('Updating teacher $id with: $jsonBody');
+    final response = await http.put(
+      Uri.parse('${ApiConfig.teachersProfiles}/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonBody,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return;
+    } else {
+      throw Exception('Error al actualizar el profesor');
+    }
+  }
 
 }
