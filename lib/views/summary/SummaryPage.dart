@@ -1,3 +1,4 @@
+// dart
 import 'package:eduspace_mobile/widgets/teachers_app_drawer.dart';
 import 'package:flutter/material.dart';
 import '../../services/classroom_service.dart';
@@ -64,7 +65,7 @@ class _SummaryPageState extends State<SummaryPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
               const Text('Salones asignados', style: TextStyle(color: Color(
-                  0xFF000000), fontWeight: FontWeight.bold, fontSize: 22)),
+                  0xFFFFFFFF), fontWeight: FontWeight.bold, fontSize: 22)),
               const SizedBox(height: 10),
               FutureBuilder<List<Classroom>>(
                 future: _classroomsFuture,
@@ -111,45 +112,56 @@ class _SummaryPageState extends State<SummaryPage> {
               ),
               const SizedBox(height: 24),
               const Text('Reuniones asignadas', style: TextStyle(color: Color(
-                  0xFF000000), fontWeight: FontWeight.bold, fontSize: 22)),
+                  0xFFFFFFFF), fontWeight: FontWeight.bold, fontSize: 22)),
               const SizedBox(height: 10),
-              FutureBuilder<List<Meeting>>(
-                future: _meetingsFuture,
+
+              // Wait for both meetings and classrooms so we can show classroom name in each meeting card
+              FutureBuilder<List<dynamic>>(
+                future: Future.wait([_meetingsFuture, _classroomsFuture]),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: Colors.white)));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  } else if (!snapshot.hasData) {
                     return const Center(child: Text('No hay reuniones disponibles.', style: TextStyle(color: Colors.white, fontSize: 18)));
                   } else {
-                    final meetings = snapshot.data!;
+                    final data = snapshot.data!;
+                    final meetings = (data[0] as List<Meeting>);
+                    final classrooms = (data[1] as List<Classroom>);
+
+                    if (meetings.isEmpty) {
+                      return const Center(child: Text('No hay reuniones disponibles.', style: TextStyle(color: Colors.white, fontSize: 18)));
+                    }
+
                     return Column(
-                      children: meetings.map((meeting) => Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                        elevation: 6,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          title: Text(
-                            meeting.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Color(0xFF1976D2),
+                      children: meetings.map((meeting) {
+                        return Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                          elevation: 6,
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            title: Text(
+                              meeting.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Color(0xFF1976D2),
+                              ),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(meeting.description, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(height: 4),
+                                Text('Fecha: ${meeting.date}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                                Text('Inicio: ${meeting.start}  Fin: ${meeting.end}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                              ],
                             ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(meeting.description, style: const TextStyle(fontSize: 16)),
-                              const SizedBox(height: 4),
-                              Text('Fecha: ${meeting.date}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                              Text('Inicio: ${meeting.start}  Fin: ${meeting.end}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                            ],
-                          ),
-                        ),
-                      )).toList(),
+                        );
+                      }).toList(),
                     );
                   }
                 },
