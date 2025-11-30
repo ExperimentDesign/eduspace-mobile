@@ -19,6 +19,7 @@ class _ReservationsPageState extends State<ReservationsPage> {
   final ReservationsService _reservationsService = ReservationsService();
   final TeachersService _teachersService = TeachersService();
   final SharedSpacesService _sharedSpacesService = SharedSpacesService();
+  int _refreshKey = 0;
 
   Future<List<Map<String, dynamic>>> _fetchReservationsWithDetails() async {
     final reservations = await _reservationsService.getAllReservations();
@@ -173,6 +174,108 @@ class _ReservationsPageState extends State<ReservationsPage> {
     );
   }
 
+  void _showEditReservationDialog(BuildContext context, Reservation reservation) {
+    String title = reservation.title;
+    DateTime start = reservation.start;
+    DateTime end = reservation.end;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Editar Reserva'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration: const InputDecoration(labelText: 'Título'),
+                      controller: TextEditingController(text: title),
+                      onChanged: (value) => title = value,
+                    ),
+                    const SizedBox(height: 10),
+                    ListTile(
+                      leading: const Icon(Icons.calendar_today),
+                      title: Text('Inicio: ${DateFormat('dd/MM/yyyy HH:mm').format(start)}'),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: start,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (date != null) {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(start),
+                          );
+                          if (time != null) {
+                            setState(() {
+                              start = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                            });
+                          }
+                        }
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.calendar_today),
+                      title: Text('Fin: ${DateFormat('dd/MM/yyyy HH:mm').format(end)}'),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: end,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2100),
+                        );
+                        if (date != null) {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(end),
+                          );
+                          if (time != null) {
+                            setState(() {
+                              end = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                ElevatedButton(
+                  child: const Text('Guardar'),
+                  onPressed: () async {
+                    if (title.isNotEmpty) {
+                      await _reservationsService.editReservation(
+                        id: reservation.id!,
+                        title: title,
+                        start: start,
+                        end: end,
+                      );
+                      Navigator.of(context).pop();
+                      setState(() {}); // Refresh list
+                      this.setState(() {
+                        _refreshKey++;
+                      });
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -268,8 +371,27 @@ class _ReservationsPageState extends State<ReservationsPage> {
                               Text('Teacher: $teacherName', style: const TextStyle(fontSize: 16)),
                             ],
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.orange),
+                                onPressed: () => _showEditReservationDialog(context, reservation),
+                                tooltip: 'Editar',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  await _reservationsService.deleteReservation(reservation.id!);
+                                  setState(() {}); // Refresh list
+                                },
+                                tooltip: 'Eliminar',
+                              ),
+                            ],
+                          ),
                         ],
                       ),
+
                     ),
                   );
                 }).toList(),
