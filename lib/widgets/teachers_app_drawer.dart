@@ -69,8 +69,8 @@ class TeachersAppDrawer extends StatelessWidget {
               ),
             ),
           ),
-          buildTile(icon: Icons.dashboard, title: 'Summary', route: '/summary'),
-          buildTile(icon: Icons.book_online, title: 'Reservations', route: '/reservations'),
+          buildTile(icon: Icons.dashboard, title: 'Resumen', route: '/summary'),
+          buildTile(icon: Icons.book_online, title: 'Reservaciones', route: '/reservations'),
           const Spacer(),
           const Divider(thickness: 1, indent: 16, endIndent: 16),
           ListTile(
