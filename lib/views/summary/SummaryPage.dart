@@ -25,6 +25,8 @@ class _SummaryPageState extends State<SummaryPage> {
   @override
   void initState() {
     super.initState();
+    _classroomsFuture = Future.value([]);
+    _meetingsFuture = Future.value([]);
     _loadDataForTeacher();
   }
 
