@@ -1,10 +1,12 @@
 // dart
 import 'package:eduspace_mobile/widgets/teachers_app_drawer.dart';
 import 'package:flutter/material.dart';
+import '../../models/teacher.dart';
 import '../../services/classroom_service.dart';
 import '../../services/meetings_service.dart';
 import '../../models/classroom.dart';
 import '../../models/meeting.dart';
+import '../../services/teachers_service.dart';
 import '../../utils/token_utils.dart';
 import '../classroom-reports/TeacherClassroomPage.dart';
 
@@ -21,12 +23,14 @@ class _SummaryPageState extends State<SummaryPage> {
 
   late Future<List<Classroom>> _classroomsFuture;
   late Future<List<Meeting>> _meetingsFuture;
+  late Future<Teacher?> _teacherProfileFuture;
 
   @override
   void initState() {
     super.initState();
     _classroomsFuture = Future.value([]);
     _meetingsFuture = Future.value([]);
+    _teacherProfileFuture = _loadTeacherProfile();
     _loadDataForTeacher();
   }
 
@@ -42,6 +46,11 @@ class _SummaryPageState extends State<SummaryPage> {
           : Future.value([]);
     });
   }
+  Future<Teacher?> _loadTeacherProfile() async {
+    final profileId = await getProfileIdFromPrefs();
+    if (profileId == null) return null;
+    return await TeachersService().getTeacherById(profileId);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +58,7 @@ class _SummaryPageState extends State<SummaryPage> {
       extendBodyBehindAppBar: true,
       drawer: const TeachersAppDrawer(),
       appBar: AppBar(
-        title: const Text('Bienvenido docente', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Inicio', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white,
@@ -66,6 +75,52 @@ class _SummaryPageState extends State<SummaryPage> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             children: [
+              FutureBuilder<Teacher?>(
+                future: _teacherProfileFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const SizedBox.shrink();
+                  }
+                  final teacher = snapshot.data!;
+                  return Center(
+                    child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                      elevation: 8,
+                      margin: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.account_circle, size: 64, color: Color(0xFF1976D2)),
+                            const SizedBox(height: 18),
+                            Text(
+                              'Bienvenido docente',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              '${teacher.firstName} ${teacher.lastName}',
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF1976D2),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
               const Text('Salones asignados', style: TextStyle(color: Color(
                   0xFFFFFFFF), fontWeight: FontWeight.bold, fontSize: 22)),
               const SizedBox(height: 10),
