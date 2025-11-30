@@ -65,4 +65,52 @@ class AuthService {
       throw Exception("Error al crear el administrador: ${response.body}");
     }
   }
+
+  Future<AdministratorProfile?> editAdminProfile(int adminId, AdministratorProfile admin) async {
+    final url = '${ApiConfig.adminProfiles}/$adminId';
+
+    final bodyMap = {
+      'id': admin.id ?? adminId,
+      'firstName': admin.firstName,
+      'lastName': admin.lastName,
+      'email': admin.email,
+      'dni': admin.dni,
+      'address': admin.address,
+      'phone': admin.phone,
+    };
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+      body: jsonEncode(bodyMap),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return AdministratorProfile.fromJson(json.decode(response.body));
+    } else if (response.statusCode == 204) {
+      return admin;
+    } else {
+      throw Exception('Failed to update administrator profile: ${response.statusCode} ${response.body}');
+    }
+  }
+
+  Future<bool> deleteAdminProfile(int adminId) async {
+    final url = '${ApiConfig.adminProfiles}/$adminId';
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else {
+      throw Exception('Failed to delete administrator profile: ${response.statusCode} ${response.body}');
+    }
+  }
 }
