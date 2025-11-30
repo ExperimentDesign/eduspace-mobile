@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppDrawer extends StatelessWidget {
   final void Function()? onLogout;
@@ -77,6 +78,19 @@ class AppDrawer extends StatelessWidget {
           buildTile(icon: Icons.person, title: 'Profesores', route: '/teachers'),
           const Spacer(),
           buildTile(icon: Icons.person, title: 'Mi Perfil', route: '/admin-profile'),
+          ListTile(
+            leading: const Icon(Icons.book, color: Colors.green),
+            title: const Text('Libro de reclamaciones', style: TextStyle(color: Colors.green)),
+            onTap: () async {
+              final url = Uri.parse('https://forms.gle/2WEjJnKiBKw96zzf6');
+              final launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+              if (!launched) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No se pudo abrir el navegador.')),
+                );
+              }
+            },
+          ),
           const Divider(thickness: 1, indent: 16, endIndent: 16),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
